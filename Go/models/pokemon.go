@@ -23,7 +23,7 @@ type ResultsApi struct {
 
 type ObjPokemonPost struct {
 	Name string `json:"name" binding:"required" gorethink:"name"`
-	Url  string `json:"url, omitempty" gorethink:"url"`
+	Url  string `json:"url, omitempty" binding:"required"  gorethink:"url"`
 }
 type ObjPokemonGet struct {
 	Name string `json:"name" binding:"required" gorethink:"name"`

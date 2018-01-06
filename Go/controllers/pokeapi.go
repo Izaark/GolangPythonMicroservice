@@ -40,9 +40,10 @@ func PokesRouter() {
 	}))
 
 	// Routes/Endpoints
-	user := router.Group("api")
+	pokemon := router.Group("api")
 	{
-		user.GET("/users", handlerGetPokemon)
+		pokemon.GET("/pokemon", handlerGetPokemon)
+		pokemon.POST("/pokemon", handlerPostPokemon)
 
 	}
 
@@ -76,6 +77,31 @@ func handlerGetPokemon(c *gin.Context) {
 
 }
 
+func handlerPostPokemon(c *gin.Context) {
+	var (
+		vginResponse gin.H
+		vPokemon     models.ObjPokemonPost
+		err          error
+	)
+
+	err = c.BindJSON(&vPokemon)
+	if err != nil {
+		err = errors.New("Error handlerPostPokemon: couldn't bind payload provided whit ObjPokemonPost: " + err.Error())
+		vginResponse = gin.H{"message": "error reading payload provided", "response": nil, "error": "RE", "status": http.StatusBadRequest}
+		c.JSON(http.StatusBadRequest, vginResponse)
+		return
+	}
+
+	err = models.FunPostPokemon(vPokemon)
+	if err != nil {
+		err = errors.New("*Error FunPostPokemon couldn't insert pokemon in db")
+		vginResponse = gin.H{"message": "internal error", "response": nil, "error": "IE", "status": http.StatusInternalServerError}
+		c.JSON(http.StatusInternalServerError, vginResponse)
+	}
+	vginResponse = gin.H{"message": "Pokemon successfully registered", "error": nil, "status": http.StatusOK}
+	c.JSON(http.StatusCreated, vginResponse)
+}
+
 func FunGetPokemonFromApi() error {
 
 	var (
@@ -88,7 +114,7 @@ func FunGetPokemonFromApi() error {
 
 	response, err := http.Get(UrlApi)
 	if err != nil {
-		err = errors.New("*Error GetPokemonFromApi: could'nt get Api: " + UrlApi)
+		err = errors.New("*Error GetPokemonFromApi: couldn't get Api: " + UrlApi)
 		return err
 	}
 	defer response.Body.Close()
