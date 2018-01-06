@@ -58,21 +58,21 @@ func handlerGetPokemon(c *gin.Context) {
 
 	pokemons, err = models.FunGetAllPokemon()
 
-	for _, poke := range pokemons {
-		fmt.Println(poke.Name)
-	}
+	// for _, poke := range pokemons {
+	// 	fmt.Println(poke.Name)
+	// }
 	if err != nil {
-		response = gin.H{"message": "error quering pokes", "response": pokemons}
+		response = gin.H{"message": "error quering pokes", "response": nil, "error": "RE"}
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 	if pokemons == nil {
-		response = gin.H{"message": "pokes not found", "response": pokemons}
+		response = gin.H{"message": "pokes not found", "response": nil, "error": "RE"}
 		c.JSON(http.StatusNotFound, response)
 		return
 	}
 
-	response = gin.H{"message": "pokemons found", "response": pokemons}
+	response = gin.H{"message": "pokemons found", "error": nil, "status": http.StatusOK, "response": pokemons}
 	c.JSON(http.StatusOK, response)
 
 }
@@ -86,10 +86,25 @@ func handlerPostPokemon(c *gin.Context) {
 
 	err = c.BindJSON(&vPokemon)
 	if err != nil {
-		err = errors.New("Error handlerPostPokemon: couldn't bind payload provided whit ObjPokemonPost: " + err.Error())
+		err = errors.New("*Error handlerPostPokemon: couldn't bind payload provided whit ObjPokemonPost: " + err.Error())
 		vginResponse = gin.H{"message": "error reading payload provided", "response": nil, "error": "RE", "status": http.StatusBadRequest}
 		c.JSON(http.StatusBadRequest, vginResponse)
 		return
+	}
+
+	pokemon, err := models.FunGetAllPokemon()
+	if err != nil {
+		vginResponse = gin.H{"message": "error quering pokes", "response": nil, "error": "RE", "status": http.StatusBadRequest}
+		c.JSON(http.StatusInternalServerError, vginResponse)
+		return
+	}
+	for _, poke := range pokemon {
+
+		if vPokemon.Name == poke.Name {
+			vginResponse = gin.H{"message": "The pokemon is exists", "response": nil, "error": "RE", "status": http.StatusConflict}
+			c.JSON(http.StatusConflict, vginResponse)
+			return
+		}
 	}
 
 	err = models.FunPostPokemon(vPokemon)
