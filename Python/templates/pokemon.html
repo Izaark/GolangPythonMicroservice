@@ -1,0 +1,13 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>View Pokemons</title>
+</head>
+<body>
+	{% for  poke in  poke_name  %}
+		<h3>{{ poke.name }} <a href="{{ poke.url }}">Information in PokeApi</a> </h3>
+	{% endfor %}
+</body>
+</html>
