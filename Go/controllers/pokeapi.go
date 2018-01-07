@@ -53,6 +53,7 @@ func PokesRouter() {
 	router.Run(":" + os.Getenv("POK_ENV_API_PORT"))
 }
 func handlerGetAllPokemon(c *gin.Context) {
+
 	var (
 		response gin.H
 		pokemons []models.ObjPokemonGet
