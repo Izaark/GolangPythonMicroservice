@@ -1,10 +1,5 @@
-FROM izaark/python-flask
+FROM izaark/python3-flask
 COPY . /Python
 WORKDIR /Python
-
-
-RUN pip3 install -r requirements.txt
-RUN pip3 install flask
-ENTRYPOINT ["python"]
+ENTRYPOINT ["python3"]
 CMD ["main.py"]
-EXPOSE 4000
