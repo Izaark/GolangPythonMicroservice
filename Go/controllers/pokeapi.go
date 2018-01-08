@@ -124,7 +124,6 @@ func handlerUpdatePokemon(c *gin.Context) {
 		err          error
 	)
 	strID := c.Params.ByName("id")
-
 	err = c.BindJSON(&vPokemon)
 	if err != nil {
 		err = errors.New("*Error handlerUpdatePokemon: couldn't bind payload provided whit ObjPokemonPost: " + err.Error())
@@ -132,6 +131,7 @@ func handlerUpdatePokemon(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, vginResponse)
 		return
 	}
+	//todo create a function id strID exists before FunUpdatePokemon
 	err = models.FunUpdatePokemon(vPokemon, strID)
 	if err != nil {
 		vginResponse = gin.H{"message": "error quering a poke", "response": nil, "error": "RE"}
@@ -151,6 +151,7 @@ func handlerDeletePokemon(c *gin.Context) {
 	)
 
 	strID := c.Params.ByName("id")
+	//Todo: create a funcion if exists pokemon
 	err = models.FunDeletePokemon(strID)
 	if err != nil {
 		vginResponse = gin.H{"message": "error delete pokemon", "response": nil, "error": "RE"}
@@ -191,7 +192,6 @@ func FunGetPokemonFromApi() error {
 	)
 
 	UrlApi := "https://pokeapi.co/api/v2/pokemon-form/"
-	println(UrlApi)
 
 	response, err := http.Get(UrlApi)
 	if err != nil {
@@ -211,7 +211,6 @@ func FunGetPokemonFromApi() error {
 
 		vPokemon.Name = poke.Name
 		vPokemon.Url = poke.Url
-		println(vPokemon.Name)
 
 		err = models.FunPostPokemon(vPokemon)
 		if err != nil {
