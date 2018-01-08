@@ -1,8 +1,5 @@
-FROM ubuntu:latest
-RUN apt-get update -y
-RUN apt-get install -y python-pip python-dev build-essential
+FROM izaark/python3-flask
 COPY . /Python
 WORKDIR /Python
-RUN pip install -r requirements.txt
-ENTRYPOINT ["python"]
+ENTRYPOINT ["python3"]
 CMD ["main.py"]

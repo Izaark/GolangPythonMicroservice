@@ -7,7 +7,7 @@ app = Flask(__name__)
 def get_pokemon():
 
 	#todo set permission ports for sending to Api
-	urlApi = "https://daeff945.ngrok.io/api/pokemon"
+	urlApi = "http://localhost/api/pokemon"
 	r = requests.get(urlApi)
 	json_body = r.json()
 	
@@ -20,14 +20,13 @@ def get_pokemon():
 	return render_template('pokemon.html', poke_name=pokemon_name), 200
 
 
-@app.route('/register/pokemon', methods = ['POST'])
+@app.route('/register/pokemon', methods = ['POST','PUT'])
 def post_pokemon():
 	pname = request.form['pokemon']
 	purl = request.form['url']
 	#todo set permission ports for sending to Api
-	urlApi = "https://daeff945.ngrok.io/api/register/pokemon"
+	urlApi = "http://localhost/api/register/pokemon"
 	payload = {'name':pname, 'url':purl}
-	#headers = {'Content-Type':'application/json'}
 	r = requests.post(urlApi, data=json.dumps(payload))
 
 	if r.status_code == 200:
