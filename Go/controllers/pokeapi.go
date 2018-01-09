@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	//"strings"
+
 	"time"
 )
 
@@ -92,19 +92,24 @@ func handlerPostPokemon(c *gin.Context) {
 		return
 	}
 
-	pokemon, err := models.FunGetAllPokemon()
+	vboolExists, err := models.FunExistPokemon("name", vPokemon.Name)
+	println("aaaaaaa")
+	print(vboolExists)
+
+	vmapResponse := make(map[string]bool)
+	print(vmapResponse)
 	if err != nil {
-		vginResponse = gin.H{"message": "error quering pokes", "response": nil, "error": "RE", "status": http.StatusBadRequest}
+		err = errors.New("*ERROR handlerExistUserByField: couldn't know if pokemon exists by " + " -> " + err.Error())
+		vginResponse = gin.H{"message": "internal error", "response": vmapResponse, "error": "IE", "status": http.StatusInternalServerError}
 		c.JSON(http.StatusInternalServerError, vginResponse)
 		return
 	}
-	for _, poke := range pokemon {
-
-		if vPokemon.Name == poke.Name {
-			vginResponse = gin.H{"message": "The pokemon exists", "response": nil, "error": "RE", "status": http.StatusConflict}
-			c.JSON(http.StatusConflict, vginResponse)
-			return
-		}
+	if vboolExists {
+		vmapResponse["value"] = false
+		print(vmapResponse)
+		vginResponse = gin.H{"message": "pokemon name exist", "response": vmapResponse, "error": nil, "status": http.StatusOK}
+		c.JSON(http.StatusOK, vginResponse)
+		return
 	}
 
 	err = models.FunPostPokemon(vPokemon)
@@ -154,6 +159,7 @@ func handlerDeletePokemon(c *gin.Context) {
 	//Todo: create a funcion if exists pokemon
 	err = models.FunDeletePokemon(strID)
 	if err != nil {
+		err = errors.New("*Error handlerUpdatePokemon: couldn't bind payload provided whit ObjPokemonPost: " + err.Error())
 		vginResponse = gin.H{"message": "error delete pokemon", "response": nil, "error": "RE"}
 		c.JSON(http.StatusInternalServerError, vginResponse)
 		return
@@ -165,22 +171,42 @@ func handlerDeletePokemon(c *gin.Context) {
 
 func handlerGetPokemon(c *gin.Context) {
 	var (
-		vPokemon models.ObjPokemonGet
-		response gin.H
-		err      error
+		vPokemon     models.ObjPokemonGet
+		vginResponse gin.H
+		err          error
 	)
 
 	strID := c.Params.ByName("id")
-	vPokemon, err = models.FunGetPokemon(strID)
+
+	vboolExists, err := models.FunExistPokemon("id", strID)
+	println("aaaaaaa")
+	print(vboolExists)
+
+	vmapResponse := make(map[string]bool)
+	print(vmapResponse)
 	if err != nil {
-		response = gin.H{"message": "error quering a poke", "response": nil, "error": "RE"}
-		c.JSON(http.StatusInternalServerError, response)
+		err = errors.New("*ERROR handlerExistUserByField: couldn't know if pokemon exists by " + strID + " -> " + err.Error())
+		vginResponse = gin.H{"message": "internal error", "response": vmapResponse, "error": "IE", "status": http.StatusInternalServerError}
+		c.JSON(http.StatusInternalServerError, vginResponse)
+		return
+	}
+	if !vboolExists {
+		vmapResponse["value"] = false
+		print(vmapResponse)
+		vginResponse = gin.H{"message": "pokemon does not exist", "response": vmapResponse, "error": nil, "status": http.StatusOK}
+		c.JSON(http.StatusOK, vginResponse)
 		return
 	}
 
-	//Todo: create a funcion if exists pokemon
-	response = gin.H{"message": "pokemon found", "error": nil, "status": http.StatusOK, "response": vPokemon}
-	c.JSON(http.StatusOK, response)
+	vPokemon, err = models.FunGetPokemon(strID)
+	if err != nil {
+		vginResponse = gin.H{"message": "error quering a poke", "response": nil, "error": "RE"}
+		c.JSON(http.StatusInternalServerError, vginResponse)
+		return
+	}
+
+	vginResponse = gin.H{"message": "pokemon found", "error": nil, "status": http.StatusOK, "response": vPokemon}
+	c.JSON(http.StatusOK, vginResponse)
 
 }
 
