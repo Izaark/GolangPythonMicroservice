@@ -136,3 +136,45 @@ func FunGetPokemon(strID string) (ObjPokemonGet, error) {
 	return vPokes, nil
 
 }
+
+func FunExistPokemon(strField, strID string) (bool, error) {
+	var vCursor *r.Cursor
+	var vboolExist bool
+	var vintCounter int
+
+	vSessionDb, err := config.FunOpenDatabaseConnection()
+	defer vSessionDb.Close()
+	if err != nil {
+		err = errors.New("*ERROR FunExistPokemon: couldn't connect database -> " + err.Error())
+		return false, err
+	}
+
+	vCursor, err = r.Table(CstPokemonTable).GetAllByIndex(strField, strID).Count(r.Row.Field("id")).Run(vSessionDb)
+	defer vCursor.Close()
+
+	if err != nil {
+		err = errors.New("*ERROR FunExistPokemon: couldn't verify pokemon information " + "-> " + err.Error())
+		return false, err
+	}
+	err = vCursor.One(&vintCounter)
+
+	if err != nil {
+		err = errors.New("*ERROR FunExistPokemon: couldn't use cursor to verify information" + err.Error())
+		return false, err
+	}
+
+	switch vintCounter {
+	case 0:
+		err = nil
+		vboolExist = false
+	case 1:
+		err = nil
+		vboolExist = true
+	default:
+		err = errors.New("*ERROR FunExistPokemon: more than one pokenon")
+		vboolExist = false
+	}
+
+	return vboolExist, err
+
+}
